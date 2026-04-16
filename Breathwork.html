@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Breathwork · Apnea · Pranayama · Meditación</title>
+    <style>
+        :root {
+            --bg: #0b0b0f;
+            --card: #15151d;
+            --card-2: #1c1c26;
+            --text: #f2f5f7;
+            --muted: #8a92a1;
+            --green-neon: #00ff88;
+            --primary: #7c4dff;
+            --primary-press: #5c35cb;
+            --danger: #d66a7f;
+            --border: #2a2e38;
+            --blue-deep: #2e5cff;
+            --orange-warm: #ff8c42;
+            --cyan: #00e5ff;
+            --pink: #ff4081;
+            --gold: #ffd740;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Inter, system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at top, #12131b 0%, var(--bg) 60%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        .app {
+            width: min(520px, 100%);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding-bottom: 24px;
+        }
+
+        /* ── HEADER ── */
+        .header {
+            text-align: center;
+            padding: 16px 0 8px;
+        }
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            background: linear-gradient(135deg, var(--green-neon), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .sub {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 4px;
+        }
+
+        /* ── NAVIGATION ── */
+        .nav-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 10px 0;
+            transition: color 0.2s;
+        }
+        .nav-back:hover { color: var(--text); }
+        .nav-back svg { width: 18px; height: 18px; }
+
+        /* ── SCREEN CONTAINERS ── */
+        .screen { display: none; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* ── HOME MENU ── */
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin: 18px 0 8px;
+        }
+
+        .mode-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .mode-card:hover { border-color: #444; transform: translateY(-1px); }
+        .mode-card:active { transform: scale(0.995); }
+
+        .mode-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .mode-info h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .mode-info p {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.3;
+        }
+
+        .bg-apnea { background: rgba(0,255,136,0.12); }
+        .bg-breath { background: rgba(124,77,255,0.15); }
+        .bg-med { background: rgba(255,215,64,0.12); }
+
+        /* ── CONFIG SCREENS ── */
+        .config-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+        .config-card label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .config-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .config-row input, .config-row select {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 1rem;
+            padding: 10px 12px;
+            width: 100%;
+            font-family: inherit;
+        }
+        .config-row input[type="number"] {
+            width: 80px;
+            text-align: center;
+        }
+        .config-row select { cursor: pointer; }
+
+        .preset-chips {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        .chip {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chip:hover, .chip.active {
+            border-color: var(--primary);
+            color: var(--text);
+            background: rgba(124,77,255,0.15);
+        }
+
+        .btn-start {
+            width: 100%;
+            min-height: 56px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(180deg, var(--primary) 0%, #6236f8 100%);
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-top: 12px;
+            letter-spacing: 0.02em;
+        }
+        .btn-start:active { background: var(--primary-press); transform: scale(0.997); }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
+        .toggle-row span { font-size: 0.9rem; }
+        .toggle {
+            width: 44px; height: 24px;
+            background: var(--border);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .toggle.on { background: var(--primary); }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px; height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px; left: 3px;
+            transition: transform 0.2s;
+        }
+        .toggle.on::after { transform: translateX(20px); }
+
+        /* ── SESSION SCREEN ── */
+        .session-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .session-screen.active { display: flex; }
+
+        .session-phase {
+            text-align: center;
+            color: var(--muted);
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 12px 0 0;
+            min-height: 1.4em;
+        }
+        .session-instruction {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 8px 0;
+            min-height: 2em;
+        }
+
+        /* ── BREATHING CIRCLE ── */
+        .circle-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 16px auto;
+        }
+        .circle-bg {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%);
+        }
+        .circle-ring {
+            position: absolute;
+            inset: 10px;
+            border-radius: 50%;
+            border: 3px solid rgba(0,255,136,0.25);
+            transition: transform 1s ease, border-color 0.5s;
+        }
+        .circle-inner {
+            position: absolute;
+            inset: 25px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: transform 1s ease, background 0.5s;
+        }
+        .circle-timer {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--green-neon);
+            text-shadow: 0 0 10px rgba(0,255,136,0.3);
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+        .circle-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* Circle states */
+        .circle-expanded .circle-ring { transform: scale(1.1); border-color: rgba(0,229,255,0.4); }
+        .circle-expanded .circle-inner { transform: scale(1.1); background: radial-gradient(circle, rgba(0,229,255,0.12) 0%, transparent 70%); }
+        .circle-contracted .circle-ring { transform: scale(0.7); border-color: rgba(124,77,255,0.4); }
+        .circle-contracted .circle-inner { transform: scale(0.7); background: radial-gradient(circle, rgba(124,77,255,0.1) 0%, transparent 70%); }
+        .circle-partial .circle-ring { transform: scale(0.85); border-color: rgba(255,140,66,0.4); }
+        .circle-partial .circle-inner { transform: scale(0.85); background: radial-gradient(circle, rgba(255,140,66,0.1) 0%, transparent 70%); }
+        .circle-hold .circle-ring { animation: pulse-hold 2s ease-in-out infinite; }
+
+        @keyframes pulse-hold {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .session-tap-hint {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .btn-session {
+            width: 100%;
+            min-height: 64px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(180deg, var(--primary) 0%, #6236f8 100%);
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-top: auto;
+            letter-spacing: 0.02em;
+        }
+        .btn-session:active { background: var(--primary-press); }
+
+        .btn-danger {
+            background: none;
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* ── RESULTS ── */
+        .results-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 12px;
+            width: 100%;
+        }
+        .results-card h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: var(--muted); }
+        .result-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+        .round-log {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        .round-item {
+            background: var(--card-2);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            font-size: 0.82rem;
+            line-height: 1.5;
+        }
+        .round-item .round-title {
+            font-weight: 700;
+            color: var(--green-neon);
+            margin-bottom: 2px;
+        }
+
+        .btn-copy {
+            width: 100%;
+            border: 1px solid var(--green-neon);
+            background: rgba(0,255,136,0.08);
+            color: var(--green-neon);
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+        }
+        .btn-copy:hover { background: rgba(0,255,136,0.15); }
+        .btn-copy.copied { background: rgba(0,255,136,0.2); }
+
+        /* ── MEDITATION SPECIFIC ── */
+        .med-progress {
+            width: 100%;
+            height: 4px;
+            background: var(--card-2);
+            border-radius: 2px;
+            margin: 12px 0;
+            overflow: hidden;
+        }
+        .med-progress-bar {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 2px;
+            transition: width 1s linear;
+        }
+        .med-segments {
+            display: flex;
+            gap: 2px;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .med-segment {
+            flex: 1;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+        .med-segment.active { opacity: 1; }
+        .seg-anapana { background: rgba(0,229,255,0.2); color: var(--cyan); }
+        .seg-vipassana { background: rgba(124,77,255,0.2); color: var(--primary); }
+        .seg-metta { background: rgba(255,215,64,0.2); color: var(--gold); }
+
+        /* ── UTILITIES ── */
+        .hidden { display: none !important; }
+        .mt-auto { margin-top: auto; }
+        .text-center { text-align: center; }
+        .mb-8 { margin-bottom: 8px; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+    <!-- ══════════════════ HOME SCREEN ══════════════════ -->
+    <div class="screen active" id="screen-home">
+        <div class="header">
+            <h1>BREATHWORK</h1>
+            <div class="sub">Apnea · Pranayama · Meditación</div>
+        </div>
+
+        <div class="section-title">🫁 Apnea</div>
+        <div class="mode-card" onclick="openConfig('apnea-simple')">
+            <div class="mode-icon bg-apnea">💨</div>
+            <div class="mode-info">
+                <h3>Apnea Simple</h3>
+                <p>Inhalá, sostenelo, medí tu capacidad</p>
+            </div>
+        </div>
+        <div class="mode-card" onclick="openConfig('apnea-asc')">
+            <div class="mode-icon bg-apnea">📈</div>
+            <div class="mode-info">
+                <h3>Cruzada Ascendente</h3>
+                <p>Vacío → Sorbito 20% → Lleno 100%</p>
+            </div>
+        </div>
+        <div class="mode-card" onclick="openConfig('apnea-desc')">
+            <div class="mode-icon bg-apnea">📉</div>
+            <div class="mode-info">
+                <h3>Cruzada Descendente</h3>
+                <p>Lleno → Vacío → 30% → 70%</p>
+            </div>
+        </div>
+
+        <div class="section-title">🌬️ Respiración guiada</div>
+        <div class="mode-card" onclick="openConfig('wimhof')">
+            <div class="mode-icon bg-breath">❄️</div>
+            <div class="mode-info">
+                <h3>Wim Hof</h3>
+                <p>Rondas automáticas con retención</p>
+            </div>
+        </div>
+        <div class="mode-card" onclick="openConfig('pranayama')">
+            <div class="mode-icon bg-breath">🕉️</div>
+            <div class="mode-info">
+                <h3>Pranayama</h3>
+                <p>Ratios configurables · Box · 4-7-8 · Nadi Shodhana</p>
+            </div>
+        </div>
+
+        <div class="section-title">🧘 Meditación</div>
+        <div class="mode-card" onclick="openConfig('meditation')">
+            <div class="mode-icon bg-med">🔔</div>
+            <div class="mode-info">
+                <h3>Anapana / Vipassana / Metta</h3>
+                <p>Timer con gongs configurables</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════ CONFIG: APNEA SIMPLE ══════════════════ -->
+    <div class="screen" id="screen-config-apnea-simple">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Apnea Simple
+        </div>
+        <div class="config-card">
+            <p style="color:var(--muted);font-size:0.88rem;line-height:1.5;">
+                Inhalá profundo, tocá para empezar a retener. Tocá de nuevo para terminar. Medí tu capacidad a pulmón lleno.
+            </p>
+        </div>
+        <button class="btn-start" onclick="startApneaSimple()">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ CONFIG: APNEA CRUZADA ASC ══════════════════ -->
+    <div class="screen" id="screen-config-apnea-asc">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Cruzada Ascendente
+        </div>
+        <div class="config-card">
+            <p style="color:var(--muted);font-size:0.88rem;line-height:1.5;">
+                <b>Fase 1:</b> Exhalá todo → Sostené vacío<br>
+                <b>Fase 2:</b> Sorbito (20%) → Sostené<br>
+                <b>Fase 3:</b> Inhalá el resto (100%) → Sostené<br><br>
+                Click o ESPACIO avanza fase. ESC cancela.
+            </p>
+        </div>
+        <button class="btn-start" onclick="startApneaCruzada('asc')">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ CONFIG: APNEA CRUZADA DESC ══════════════════ -->
+    <div class="screen" id="screen-config-apnea-desc">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Cruzada Descendente
+        </div>
+        <div class="config-card">
+            <p style="color:var(--muted);font-size:0.88rem;line-height:1.5;">
+                <b>Fase 1:</b> Inhalá profundo → Sostené lleno<br>
+                <b>Fase 2:</b> Soltá todo → Sostené vacío<br>
+                <b>Fase 3:</b> Inhalá 30% → Sostené<br>
+                <b>Fase 4:</b> Completá al 100% → Sostené<br><br>
+                Click o ESPACIO avanza fase. ESC cancela.
+            </p>
+        </div>
+        <button class="btn-start" onclick="startApneaCruzada('desc')">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ CONFIG: WIM HOF ══════════════════ -->
+    <div class="screen" id="screen-config-wimhof">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Wim Hof
+        </div>
+        <div class="config-card">
+            <label>Rondas</label>
+            <div class="config-row">
+                <input type="number" id="wh-rounds" value="3" min="1" max="10">
+            </div>
+        </div>
+        <div class="config-card">
+            <label>Respiraciones por ronda</label>
+            <div class="config-row">
+                <input type="number" id="wh-breaths" value="30" min="10" max="60">
+            </div>
+        </div>
+        <div class="config-card">
+            <label>Retención de recuperación (seg)</label>
+            <div class="config-row">
+                <input type="number" id="wh-recovery" value="15" min="5" max="30">
+            </div>
+        </div>
+        <button class="btn-start" onclick="startWimHof()">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ CONFIG: PRANAYAMA ══════════════════ -->
+    <div class="screen" id="screen-config-pranayama">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Pranayama
+        </div>
+        <div class="config-card">
+            <label>Preset</label>
+            <div class="preset-chips">
+                <div class="chip active" onclick="setPranayamaPreset(4,7,8,0,this)">4-7-8</div>
+                <div class="chip" onclick="setPranayamaPreset(4,4,4,4,this)">Box 4-4-4-4</div>
+                <div class="chip" onclick="setPranayamaPreset(4,16,8,0,this)">Clásico 4-16-8</div>
+                <div class="chip" onclick="setPranayamaPreset(5,0,5,0,this)">Coherent 5-5</div>
+                <div class="chip" onclick="setPranayamaPreset(6,0,6,0,this)">Diafragmática</div>
+                <div class="chip" onclick="selectNadiShodhana(this)">Nadi Shodhana</div>
+            </div>
+        </div>
+        <div class="config-card">
+            <label>Inhalar (seg)</label>
+            <div class="config-row"><input type="number" id="pr-inhale" value="4" min="1" max="30"></div>
+        </div>
+        <div class="config-card">
+            <label>Retener lleno (seg) · 0 = sin retención</label>
+            <div class="config-row"><input type="number" id="pr-hold-in" value="7" min="0" max="60"></div>
+        </div>
+        <div class="config-card">
+            <label>Exhalar (seg)</label>
+            <div class="config-row"><input type="number" id="pr-exhale" value="8" min="1" max="30"></div>
+        </div>
+        <div class="config-card">
+            <label>Retener vacío (seg) · 0 = sin retención</label>
+            <div class="config-row"><input type="number" id="pr-hold-out" value="0" min="0" max="60"></div>
+        </div>
+        <div class="config-card" id="pr-nadi-config" style="display:none;">
+            <div style="color:var(--orange-warm);font-size:0.85rem;font-weight:600;">
+                ⚡ Nadi Shodhana: Alternar fosas nasales.<br>
+                Tono grave = izquierda (Ida) · Tono agudo = derecha (Pingala)
+            </div>
+        </div>
+        <div class="config-card">
+            <label>Duración total (min)</label>
+            <div class="config-row"><input type="number" id="pr-duration" value="5" min="1" max="60"></div>
+        </div>
+        <button class="btn-start" onclick="startPranayama()">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ CONFIG: MEDITATION ══════════════════ -->
+    <div class="screen" id="screen-config-meditation">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Meditación
+        </div>
+        <div class="config-card">
+            <label>Anapana (min)</label>
+            <div class="config-row"><input type="number" id="med-anapana" value="20" min="1" max="180"></div>
+        </div>
+        <div class="config-card">
+            <label>Vipassana (min) · 0 = solo Anapana</label>
+            <div class="config-row"><input type="number" id="med-vipassana" value="0" min="0" max="180"></div>
+        </div>
+        <div class="config-card">
+            <label>Metta (min) · 0 = sin Metta</label>
+            <div class="config-row"><input type="number" id="med-metta" value="0" min="0" max="30"></div>
+        </div>
+        <div class="config-card">
+            <label>Gong cada (min)</label>
+            <div class="preset-chips">
+                <div class="chip" onclick="setGongInterval(10,this)">10</div>
+                <div class="chip active" onclick="setGongInterval(15,this)">15</div>
+                <div class="chip" onclick="setGongInterval(20,this)">20</div>
+                <div class="chip" onclick="setGongInterval(30,this)">30</div>
+                <div class="chip" onclick="setGongInterval(60,this)">60</div>
+            </div>
+        </div>
+        <button class="btn-start" onclick="startMeditation()">INICIAR</button>
+    </div>
+
+    <!-- ══════════════════ SESSION SCREEN (shared) ══════════════════ -->
+    <div class="session-screen" id="screen-session">
+        <div class="session-phase" id="s-phase"></div>
+        <div class="session-instruction" id="s-instruction"></div>
+
+        <div class="circle-container" id="s-circle">
+            <div class="circle-bg"></div>
+            <div class="circle-ring"></div>
+            <div class="circle-inner">
+                <div class="circle-timer" id="s-timer">00:00</div>
+                <div class="circle-sub" id="s-circle-sub"></div>
+            </div>
+        </div>
+
+        <!-- meditation segments bar -->
+        <div class="med-segments hidden" id="s-med-segments">
+            <div class="med-segment seg-anapana" id="s-seg-ana">Anapana</div>
+            <div class="med-segment seg-vipassana hidden" id="s-seg-vip">Vipassana</div>
+            <div class="med-segment seg-metta hidden" id="s-seg-met">Metta</div>
+        </div>
+        <div class="med-progress hidden" id="s-med-progress">
+            <div class="med-progress-bar" id="s-med-bar"></div>
+        </div>
+
+        <!-- Wim Hof breath counter -->
+        <div class="hidden" id="s-wh-counter" style="text-align:center;font-size:3rem;font-weight:900;color:var(--cyan);margin:8px 0;"></div>
+
+        <div class="session-tap-hint" id="s-hint"></div>
+
+        <!-- round log during session -->
+        <div class="results-card hidden" id="s-round-log" style="width:100%;">
+            <h3>Rondas</h3>
+            <div class="round-log" id="s-rounds-list"></div>
+        </div>
+
+        <button class="btn-session hidden" id="s-btn" onclick="sessionAction()"></button>
+        <button class="btn-danger" onclick="cancelSession()" style="align-self:center;margin-top:12px;">ESC · CANCELAR</button>
+    </div>
+
+    <!-- ══════════════════ RESULTS SCREEN ══════════════════ -->
+    <div class="screen" id="screen-results">
+        <div class="nav-back" onclick="goHome()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver al inicio
+        </div>
+        <div style="text-align:center;margin:16px 0;">
+            <div style="font-size:2rem;">✅</div>
+            <h2 id="r-title">Sesión completada</h2>
+        </div>
+        <div class="results-card" id="r-summary"></div>
+        <div class="results-card" id="r-rounds"></div>
+        <button class="btn-copy" id="r-copy" onclick="copyResults()">📋 COPIAR RESULTADOS</button>
+        <button class="btn-start" onclick="goHome()" style="margin-top:8px;background:var(--card);border:1px solid var(--border);">VOLVER AL INICIO</button>
+    </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// AUDIO ENGINE
+// ═══════════════════════════════════════════════════════
+const AudioEngine = (() => {
+    let ctx = null;
+    const getCtx = () => {
+        if (!ctx || ctx.state === 'closed') ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+    };
+
+    function tone(freq, dur, vol = 0.12, type = 'sine') {
+        const c = getCtx();
+        const o = c.createOscillator();
+        const g = c.createGain();
+        o.type = type;
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0.0001, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(vol, c.currentTime + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(); o.stop(c.currentTime + dur + 0.02);
+        o.onended = () => { o.disconnect(); g.disconnect(); };
+    }
+
+    // ascending tone = "inhale"
+    function inhale() {
+        tone(330, 0.15); setTimeout(() => tone(440, 0.15), 100); setTimeout(() => tone(550, 0.2), 200);
+    }
+    // descending tone = "exhale"
+    function exhale() {
+        tone(550, 0.15); setTimeout(() => tone(440, 0.15), 100); setTimeout(() => tone(330, 0.2), 200);
+    }
+    // sustained low = "hold"
+    function hold() { tone(220, 0.5, 0.08); }
+    // click/tick for metronome
+    function tick() { tone(800, 0.04, 0.1, 'square'); }
+    // phase advance beep
+    function phaseBeep() { tone(880, 0.12, 0.12); }
+    // double beep = round complete
+    function doubleBeep() { tone(900, 0.12, 0.12); setTimeout(() => tone(1100, 0.14, 0.12), 170); }
+    // Wim Hof breath in
+    function whBreathIn() { tone(440, 0.08, 0.07); }
+    // Wim Hof breath out
+    function whBreathOut() { tone(350, 0.06, 0.05); }
+    // Nadi left (low warm)
+    function nadiLeft() { tone(260, 0.25, 0.1); }
+    // Nadi right (bright)
+    function nadiRight() { tone(520, 0.25, 0.1); }
+
+    // Gong — wood block style
+    function gongWood() {
+        const c = getCtx();
+        const o = c.createOscillator(); const g = c.createGain();
+        o.type = 'triangle'; o.frequency.value = 420;
+        g.gain.setValueAtTime(0.2, c.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 1.5);
+        o.connect(g); g.connect(c.destination);
+        o.start(); o.stop(c.currentTime + 1.6);
+        o.onended = () => { o.disconnect(); g.disconnect(); };
+    }
+
+    // Gong — resonant bowl (for Metta / transitions)
+    function gongBowl() {
+        const c = getCtx();
+        const freqs = [260, 392, 523];
+        freqs.forEach(f => {
+            const o = c.createOscillator(); const g = c.createGain();
+            o.type = 'sine'; o.frequency.value = f;
+            g.gain.setValueAtTime(0.12, c.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 3.5);
+            o.connect(g); g.connect(c.destination);
+            o.start(); o.stop(c.currentTime + 3.6);
+            o.onended = () => { o.disconnect(); g.disconnect(); };
+        });
+    }
+
+    // Triple gong — session end
+    function tripleGong() {
+        gongBowl();
+        setTimeout(gongBowl, 1200);
+        setTimeout(gongBowl, 2400);
+    }
+
+    return { inhale, exhale, hold, tick, phaseBeep, doubleBeep, whBreathIn, whBreathOut, nadiLeft, nadiRight, gongWood, gongBowl, tripleGong, getCtx };
+})();
+
+// ═══════════════════════════════════════════════════════
+// APP STATE & NAVIGATION
+// ═══════════════════════════════════════════════════════
+let currentMode = null;
+let sessionInterval = null;
+let sessionData = {};
+
+function showScreen(id) {
+    document.querySelectorAll('.screen, .session-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+    if (sessionData._cleanup) sessionData._cleanup();
+    clearInterval(sessionInterval);
+    sessionInterval = null;
+    sessionData = {};
+    $('s-rounds-list').innerHTML = '';
+    showScreen('screen-home');
+    currentMode = null;
+}
+
+function openConfig(mode) {
+    currentMode = mode;
+    showScreen('screen-config-' + mode);
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function fmt(ms) {
+    const s = ms / 1000;
+    const m = Math.floor(s / 60);
+    const sec = (s % 60).toFixed(1);
+    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(4,'0')}`;
+}
+function fmtSec(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`;
+}
+function now() { return Date.now(); }
+function $(id) { return document.getElementById(id); }
+
+function setCircle(state) {
+    const c = $('s-circle');
+    c.classList.remove('circle-expanded','circle-contracted','circle-partial','circle-hold');
+    if (state) c.classList.add('circle-' + state);
+}
+
+// ═══════════════════════════════════════════════════════
+// APNEA SIMPLE
+// ═══════════════════════════════════════════════════════
+function startApneaSimple() {
+    showScreen('screen-session');
+    currentMode = 'apnea-simple';
+    sessionData = { mode: 'Apnea Simple', rounds: [], startTime: new Date() };
+    let phase = 0; // 0=ready, 1=holding, 2=done
+    let holdStart = 0;
+    let roundNum = 0;
+
+    $('s-phase').textContent = 'Apnea Simple';
+    $('s-instruction').textContent = 'Inhalá profundo';
+    $('s-timer').textContent = '00:00.0';
+    $('s-circle-sub').textContent = '';
+    $('s-hint').textContent = 'Tocá o ESPACIO cuando estés listo';
+    $('s-btn').classList.add('hidden');
+    $('s-round-log').classList.add('hidden');
+    $('s-med-segments').classList.add('hidden');
+    $('s-med-progress').classList.add('hidden');
+    $('s-wh-counter').classList.add('hidden');
+    setCircle('expanded');
+
+    function update() {
+        if (phase === 1) {
+            $('s-timer').textContent = fmt(now() - holdStart);
+        }
+    }
+
+    function action() {
+        if (phase === 0) {
+            phase = 1;
+            holdStart = now();
+            $('s-instruction').textContent = 'SOSTENELO';
+            $('s-hint').textContent = 'Tocá o ESPACIO para soltar';
+            setCircle('hold');
+            AudioEngine.hold();
+            sessionInterval = setInterval(update, 100);
+        } else if (phase === 1) {
+            clearInterval(sessionInterval);
+            const elapsed = now() - holdStart;
+            roundNum++;
+            sessionData.rounds.push({ num: roundNum, time: elapsed });
+            phase = 0;
+
+            $('s-instruction').textContent = `${fmt(elapsed)}`;
+            $('s-hint').textContent = 'Tocá para otra ronda · ESC para terminar';
+            setCircle('expanded');
+            AudioEngine.doubleBeep();
+
+            // show round log
+            $('s-round-log').classList.remove('hidden');
+            const div = document.createElement('div');
+            div.className = 'round-item';
+            div.innerHTML = `<div class="round-title">Ronda ${roundNum}</div>${fmt(elapsed)}`;
+            $('s-rounds-list').prepend(div);
+        }
+    }
+
+    sessionData._action = action;
+    sessionData._cleanup = () => { clearInterval(sessionInterval); };
+}
+
+// ═══════════════════════════════════════════════════════
+// APNEA CRUZADA (ASC & DESC)
+// ═══════════════════════════════════════════════════════
+const CRUZADA_PHASES = {
+    asc: [
+        { name: 'Vacío Total', instruction: 'Exhalá todo y SOSTENÉ', circle: 'contracted' },
+        { name: 'Sorbito (20%)', instruction: 'Sorbito de aire y SOSTENÉ', circle: 'partial' },
+        { name: 'Lleno (100%)', instruction: 'Inhalá todo y SOSTENÉ', circle: 'expanded' },
+    ],
+    desc: [
+        { name: 'Lleno Total', instruction: 'Inhalá profundo y SOSTENÉ', circle: 'expanded' },
+        { name: 'Vacío Total', instruction: 'Soltá todo y SOSTENÉ', circle: 'contracted' },
+        { name: 'Inhalar 30%', instruction: 'Inhalá un 30% y SOSTENÉ', circle: 'partial' },
+        { name: 'Completar 100%', instruction: 'Completá la inhalación y SOSTENÉ', circle: 'expanded' },
+    ]
+};
+
+function startApneaCruzada(type) {
+    showScreen('screen-session');
+    currentMode = 'apnea-' + type;
+    const phases = CRUZADA_PHASES[type];
+    const modeName = type === 'asc' ? 'Cruzada Ascendente' : 'Cruzada Descendente';
+    sessionData = { mode: modeName, rounds: [], startTime: new Date() };
+
+    let phase = -1; // -1=ready, 0..n = phase index, phases.length = round done
+    let phaseStart = 0;
+    let roundNum = 0;
+    let currentSplits = [];
+
+    $('s-phase').textContent = modeName;
+    $('s-instruction').textContent = phases[0].instruction.replace(' y SOSTENÉ', '');
+    $('s-timer').textContent = '00:00.0';
+    $('s-circle-sub').textContent = '';
+    $('s-hint').textContent = 'Tocá o ESPACIO para empezar';
+    $('s-btn').classList.add('hidden');
+    $('s-round-log').classList.add('hidden');
+    $('s-med-segments').classList.add('hidden');
+    $('s-med-progress').classList.add('hidden');
+    $('s-wh-counter').classList.add('hidden');
+    setCircle(phases[0].circle);
+
+    function update() {
+        if (phase >= 0 && phase < phases.length) {
+            $('s-timer').textContent = fmt(now() - phaseStart);
+        }
+    }
+
+    function action() {
+        if (phase === -1) {
+            // Start first phase
+            phase = 0;
+            phaseStart = now();
+            currentSplits = [];
+            $('s-phase').textContent = `${modeName} · Fase ${phase+1}/${phases.length}`;
+            $('s-instruction').textContent = phases[0].instruction;
+            $('s-hint').textContent = `ESPACIO → Fase ${phase+2 <= phases.length ? phase+2 : 'fin'}`;
+            setCircle('hold');
+            AudioEngine.phaseBeep();
+            sessionInterval = setInterval(update, 100);
+        } else if (phase < phases.length) {
+            // Record current phase
+            const elapsed = now() - phaseStart;
+            currentSplits.push({ name: phases[phase].name, time: elapsed });
+
+            phase++;
+            if (phase < phases.length) {
+                // Next phase
+                phaseStart = now();
+                $('s-phase').textContent = `${modeName} · Fase ${phase+1}/${phases.length}`;
+                $('s-instruction').textContent = phases[phase].instruction;
+                $('s-hint').textContent = phase + 1 < phases.length ? `ESPACIO → Fase ${phase+2}` : 'ESPACIO → Terminar ronda';
+                setCircle('hold');
+                AudioEngine.phaseBeep();
+            } else {
+                // Round complete
+                clearInterval(sessionInterval);
+                roundNum++;
+                const total = currentSplits.reduce((a, s) => a + s.time, 0);
+                sessionData.rounds.push({ num: roundNum, splits: [...currentSplits], total });
+
+                $('s-instruction').textContent = `Ronda ${roundNum} ✔`;
+                $('s-hint').textContent = 'Tocá para otra ronda · ESC para terminar';
+                setCircle(phases[0].circle);
+                AudioEngine.doubleBeep();
+
+                // Log
+                $('s-round-log').classList.remove('hidden');
+                const div = document.createElement('div');
+                div.className = 'round-item';
+                div.innerHTML = `<div class="round-title">Ronda ${roundNum} · Total ${fmt(total)}</div>` +
+                    currentSplits.map(s => `${s.name}: ${fmt(s.time)}`).join('<br>');
+                $('s-rounds-list').prepend(div);
+
+                // Reset for next round
+                phase = -1;
+            }
+        }
+    }
+
+    sessionData._action = action;
+    sessionData._cleanup = () => { clearInterval(sessionInterval); };
+}
+
+// ═══════════════════════════════════════════════════════
+// WIM HOF
+// ═══════════════════════════════════════════════════════
+function startWimHof() {
+    const totalRounds = parseInt($('wh-rounds').value) || 3;
+    const breathsPerRound = parseInt($('wh-breaths').value) || 30;
+    const recoveryTime = parseInt($('wh-recovery').value) || 15;
+
+    showScreen('screen-session');
+    currentMode = 'wimhof';
+    sessionData = { mode: 'Wim Hof', rounds: [], startTime: new Date(), config: { totalRounds, breathsPerRound, recoveryTime } };
+
+    let round = 0;
+    let whPhase = 'idle'; // idle, breathing, retention, recovery
+    let breathCount = 0;
+    let phaseStart = 0;
+    let breathInterval = null;
+
+    $('s-phase').textContent = 'Wim Hof';
+    $('s-instruction').textContent = 'Preparate';
+    $('s-timer').textContent = '00:00';
+    $('s-circle-sub').textContent = '';
+    $('s-hint').textContent = 'Tocá para empezar';
+    $('s-btn').classList.add('hidden');
+    $('s-round-log').classList.add('hidden');
+    $('s-med-segments').classList.add('hidden');
+    $('s-med-progress').classList.add('hidden');
+    $('s-wh-counter').classList.remove('hidden');
+    $('s-wh-counter').textContent = '';
+    setCircle(null);
+
+    function startBreathing() {
+        round++;
+        whPhase = 'breathing';
+        breathCount = 0;
+        $('s-phase').textContent = `Wim Hof · Ronda ${round}/${totalRounds}`;
+        $('s-instruction').textContent = 'RESPIRÁ';
+
+        breathInterval = setInterval(() => {
+            breathCount++;
+            $('s-wh-counter').textContent = breathCount;
+            if (breathCount % 2 === 1) {
+                setCircle('expanded');
+                AudioEngine.whBreathIn();
+            } else {
+                setCircle('contracted');
+                AudioEngine.whBreathOut();
+            }
+
+            if (breathCount >= breathsPerRound) {
+                clearInterval(breathInterval);
+                setTimeout(() => startRetention(), 600);
+            }
+        }, 1600);
+    }
+
+    function startRetention() {
+        whPhase = 'retention';
+        phaseStart = now();
+        $('s-instruction').textContent = 'EXHALÁ Y SOSTENÉ';
+        $('s-wh-counter').textContent = '';
+        $('s-hint').textContent = 'Tocá cuando necesites respirar';
+        setCircle('contracted');
+        AudioEngine.exhale();
+        setCircle('hold');
+
+        sessionInterval = setInterval(() => {
+            $('s-timer').textContent = fmt(now() - phaseStart);
+        }, 100);
+    }
+
+    function startRecovery() {
+        whPhase = 'recovery';
+        const retentionTime = now() - phaseStart;
+        clearInterval(sessionInterval);
+
+        sessionData.rounds.push({ num: round, retention: retentionTime });
+
+        // Show log
+        $('s-round-log').classList.remove('hidden');
+        const div = document.createElement('div');
+        div.className = 'round-item';
+        div.innerHTML = `<div class="round-title">Ronda ${round}</div>Retención: ${fmt(retentionTime)}`;
+        $('s-rounds-list').prepend(div);
+
+        $('s-instruction').textContent = 'INHALÁ Y SOSTENÉ';
+        setCircle('expanded');
+        AudioEngine.inhale();
+
+        let remaining = recoveryTime;
+        $('s-timer').textContent = fmtSec(remaining);
+        $('s-wh-counter').textContent = '';
+
+        sessionInterval = setInterval(() => {
+            remaining--;
+            $('s-timer').textContent = fmtSec(remaining);
+            if (remaining <= 0) {
+                clearInterval(sessionInterval);
+                AudioEngine.exhale();
+                if (round < totalRounds) {
+                    setTimeout(() => startBreathing(), 1000);
+                } else {
+                    finishSession();
+                }
+            }
+        }, 1000);
+    }
+
+    function action() {
+        if (whPhase === 'idle') {
+            startBreathing();
+            $('s-hint').textContent = '';
+        } else if (whPhase === 'retention') {
+            startRecovery();
+            $('s-hint').textContent = '';
+        }
+    }
+
+    function finishSession() {
+        whPhase = 'done';
+        AudioEngine.tripleGong();
+        showResults();
+    }
+
+    sessionData._action = action;
+    sessionData._cleanup = () => { clearInterval(sessionInterval); clearInterval(breathInterval); };
+}
+
+// ═══════════════════════════════════════════════════════
+// PRANAYAMA
+// ═══════════════════════════════════════════════════════
+let isNadiShodhana = false;
+let gongIntervalMin = 15;
+
+function setPranayamaPreset(inh, holdIn, exh, holdOut, el) {
+    $('pr-inhale').value = inh;
+    $('pr-hold-in').value = holdIn;
+    $('pr-exhale').value = exh;
+    $('pr-hold-out').value = holdOut;
+    isNadiShodhana = false;
+    $('pr-nadi-config').style.display = 'none';
+    document.querySelectorAll('#screen-config-pranayama .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function selectNadiShodhana(el) {
+    setPranayamaPreset(4, 0, 4, 0, el);
+    isNadiShodhana = true;
+    $('pr-nadi-config').style.display = 'block';
+}
+
+function startPranayama() {
+    const inhale = parseInt($('pr-inhale').value) || 4;
+    const holdIn = parseInt($('pr-hold-in').value) || 0;
+    const exhaleT = parseInt($('pr-exhale').value) || 4;
+    const holdOut = parseInt($('pr-hold-out').value) || 0;
+    const totalMin = parseInt($('pr-duration').value) || 5;
+    const totalMs = totalMin * 60 * 1000;
+    const nadi = isNadiShodhana;
+
+    showScreen('screen-session');
+    currentMode = 'pranayama';
+    const presetName = nadi ? 'Nadi Shodhana' : `${inhale}-${holdIn}-${exhaleT}-${holdOut}`;
+    sessionData = { mode: `Pranayama (${presetName})`, rounds: [], startTime: new Date(), config: { inhale, holdIn, exhaleT, holdOut, totalMin, nadi } };
+
+    let sessionStart = now();
+    let cycleCount = 0;
+    let nadiSide = 'left'; // alternates each half-cycle
+
+    $('s-phase').textContent = nadi ? 'Nadi Shodhana' : 'Pranayama';
+    $('s-hint').textContent = 'Seguí los sonidos · ESC para terminar';
+    $('s-btn').classList.add('hidden');
+    $('s-round-log').classList.add('hidden');
+    $('s-med-segments').classList.add('hidden');
+    $('s-med-progress').classList.add('hidden');
+    $('s-wh-counter').classList.add('hidden');
+
+    function buildPhases() {
+        const phases = [];
+        phases.push({ name: 'Inhalar', dur: inhale, circle: 'expanded', sound: nadi ? (nadiSide === 'left' ? 'nadiLeft' : 'nadiRight') : 'inhale' });
+        if (holdIn > 0) phases.push({ name: 'Retener', dur: holdIn, circle: 'hold', sound: 'hold' });
+        phases.push({ name: 'Exhalar', dur: exhaleT, circle: 'contracted', sound: nadi ? (nadiSide === 'left' ? 'nadiRight' : 'nadiLeft') : 'exhale' });
+        if (holdOut > 0) phases.push({ name: 'Retener vacío', dur: holdOut, circle: 'hold', sound: 'hold' });
+        return phases;
+    }
+
+    function runCycle() {
+        if (now() - sessionStart >= totalMs) {
+            finishPranayama();
+            return;
+        }
+
+        cycleCount++;
+        const phases = buildPhases();
+        let i = 0;
+
+        function runPhase() {
+            if (now() - sessionStart >= totalMs) { finishPranayama(); return; }
+            if (i >= phases.length) {
+                if (nadi) nadiSide = nadiSide === 'left' ? 'right' : 'left';
+                runCycle();
+                return;
+            }
+
+            const p = phases[i];
+            $('s-instruction').textContent = nadi ? `${p.name} · ${nadiSide === 'left' ? '◀ Izq' : 'Der ▶'}` : p.name;
+            setCircle(p.circle);
+            if (AudioEngine[p.sound]) AudioEngine[p.sound]();
+
+            let remaining = p.dur;
+            $('s-timer').textContent = fmtSec(remaining);
+            $('s-circle-sub').textContent = `Ciclo ${cycleCount}`;
+
+            clearInterval(sessionInterval);
+            sessionInterval = setInterval(() => {
+                remaining--;
+                $('s-timer').textContent = fmtSec(remaining);
+                if (remaining <= 0) {
+                    clearInterval(sessionInterval);
+                    i++;
+                    runPhase();
+                }
+            }, 1000);
+        }
+
+        runPhase();
+    }
+
+    function finishPranayama() {
+        clearInterval(sessionInterval);
+        sessionData.rounds.push({ cycles: cycleCount, duration: now() - sessionStart });
+        AudioEngine.tripleGong();
+        showResults();
+    }
+
+    runCycle();
+
+    sessionData._action = () => {}; // no manual action needed
+    sessionData._cleanup = () => { clearInterval(sessionInterval); };
+}
+
+// ═══════════════════════════════════════════════════════
+// MEDITATION
+// ═══════════════════════════════════════════════════════
+function setGongInterval(min, el) {
+    gongIntervalMin = min;
+    document.querySelectorAll('#screen-config-meditation .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function startMeditation() {
+    const anaMin = parseInt($('med-anapana').value) || 20;
+    const vipMin = parseInt($('med-vipassana').value) || 0;
+    const metMin = parseInt($('med-metta').value) || 0;
+    const totalMin = anaMin + vipMin + metMin;
+    const totalMs = totalMin * 60 * 1000;
+    const gongEvery = gongIntervalMin * 60 * 1000;
+
+    showScreen('screen-session');
+    currentMode = 'meditation';
+    sessionData = { mode: 'Meditación', rounds: [], startTime: new Date(), config: { anaMin, vipMin, metMin, gongIntervalMin, totalMin } };
+
+    $('s-phase').textContent = 'Meditación';
+    $('s-instruction').textContent = 'Anapana';
+    $('s-hint').textContent = 'ESC para terminar antes';
+    $('s-btn').classList.add('hidden');
+    $('s-round-log').classList.add('hidden');
+    $('s-wh-counter').classList.add('hidden');
+    setCircle(null);
+
+    // Segments bar
+    const segBar = $('s-med-segments');
+    segBar.classList.remove('hidden');
+    const segAna = $('s-seg-ana');
+    const segVip = $('s-seg-vip');
+    const segMet = $('s-seg-met');
+
+    segAna.style.flex = anaMin;
+    segAna.textContent = `Anapana ${anaMin}m`;
+    segAna.classList.add('active');
+
+    if (vipMin > 0) { segVip.classList.remove('hidden'); segVip.style.flex = vipMin; segVip.textContent = `Vipassana ${vipMin}m`; segVip.classList.remove('active'); }
+    else { segVip.classList.add('hidden'); }
+
+    if (metMin > 0) { segMet.classList.remove('hidden'); segMet.style.flex = metMin; segMet.textContent = `Metta ${metMin}m`; segMet.classList.remove('active'); }
+    else { segMet.classList.add('hidden'); }
+
+    $('s-med-progress').classList.remove('hidden');
+    $('s-med-bar').style.width = '0%';
+
+    let startTime = now();
+    let nextGong = gongEvery;
+    let currentSegment = 'anapana';
+
+    // Opening gong
+    AudioEngine.gongBowl();
+
+    function getSegment(elapsed) {
+        const anaMs = anaMin * 60000;
+        const vipMs = vipMin * 60000;
+        if (elapsed < anaMs) return 'anapana';
+        if (vipMin > 0 && elapsed < anaMs + vipMs) return 'vipassana';
+        return metMin > 0 ? 'metta' : (vipMin > 0 ? 'vipassana' : 'anapana');
+    }
+
+    sessionInterval = setInterval(() => {
+        const elapsed = now() - startTime;
+        const remaining = totalMs - elapsed;
+
+        if (remaining <= 0) {
+            finishMeditation(elapsed);
+            return;
+        }
+
+        // Timer
+        const remSec = Math.ceil(remaining / 1000);
+        $('s-timer').textContent = fmtSec(remSec);
+        $('s-circle-sub').textContent = `${Math.floor(elapsed/60000)}m de ${totalMin}m`;
+
+        // Progress
+        $('s-med-bar').style.width = `${(elapsed / totalMs) * 100}%`;
+
+        // Segment transitions
+        const seg = getSegment(elapsed);
+        if (seg !== currentSegment) {
+            currentSegment = seg;
+            segAna.classList.toggle('active', seg === 'anapana');
+            segVip.classList.toggle('active', seg === 'vipassana');
+            segMet.classList.toggle('active', seg === 'metta');
+
+            if (seg === 'vipassana') {
+                $('s-instruction').textContent = 'Vipassana';
+                AudioEngine.gongWood();
+            } else if (seg === 'metta') {
+                $('s-instruction').textContent = 'Metta';
+                AudioEngine.gongBowl();
+            }
+        }
+
+        // Interval gongs
+        if (elapsed >= nextGong) {
+            if (currentSegment === 'metta') AudioEngine.gongBowl();
+            else AudioEngine.gongWood();
+            nextGong += gongEvery;
+        }
+    }, 1000);
+
+    function finishMeditation(elapsed) {
+        clearInterval(sessionInterval);
+        sessionData.rounds.push({ duration: elapsed });
+        AudioEngine.tripleGong();
+        $('s-med-bar').style.width = '100%';
+        setTimeout(() => showResults(), 500);
+    }
+
+    sessionData._action = () => {};
+    sessionData._cleanup = () => { clearInterval(sessionInterval); };
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSION ACTION (click/spacebar)
+// ═══════════════════════════════════════════════════════
+function sessionAction() {
+    if (sessionData._action) sessionData._action();
+}
+
+function cancelSession() {
+    if (sessionData._cleanup) sessionData._cleanup();
+    clearInterval(sessionInterval);
+    sessionInterval = null;
+    if (sessionData.rounds && sessionData.rounds.length > 0) {
+        showResults();
+    } else {
+        showScreen('screen-home');
+        currentMode = null;
+    }
+}
+
+// Click on session screen
+document.addEventListener('click', (e) => {
+    const session = $('screen-session');
+    if (!session.classList.contains('active')) return;
+    if (e.target.tagName === 'BUTTON') return;
+    sessionAction();
+});
+
+// Keyboard
+document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        const session = $('screen-session');
+        if (session.classList.contains('active')) {
+            // Init audio context on first interaction
+            AudioEngine.getCtx();
+            sessionAction();
+        }
+    }
+    if (e.key === 'Escape') {
+        const session = $('screen-session');
+        if (session.classList.contains('active')) {
+            cancelSession();
+            if (!sessionData.rounds || sessionData.rounds.length === 0) goHome();
+        }
+    }
+});
+
+// ═══════════════════════════════════════════════════════
+// RESULTS SCREEN
+// ═══════════════════════════════════════════════════════
+function showResults() {
+    showScreen('screen-results');
+    const d = sessionData;
+    $('r-title').textContent = `${d.mode} · Sesión completada`;
+
+    // Summary
+    let summaryHTML = '';
+    const dateStr = d.startTime.toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = d.startTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+    summaryHTML += `<div class="result-row"><span class="result-label">Fecha</span><span class="result-value">${dateStr}</span></div>`;
+    summaryHTML += `<div class="result-row"><span class="result-label">Hora</span><span class="result-value">${timeStr}</span></div>`;
+    summaryHTML += `<div class="result-row"><span class="result-label">Modo</span><span class="result-value">${d.mode}</span></div>`;
+    summaryHTML += `<div class="result-row"><span class="result-label">Rondas</span><span class="result-value">${d.rounds.length}</span></div>`;
+    $('r-summary').innerHTML = `<h3>Resumen</h3>${summaryHTML}`;
+
+    // Round details
+    let roundsHTML = '<h3>Detalle</h3><div class="round-log">';
+    d.rounds.forEach(r => {
+        let detail = '';
+        if (r.splits) {
+            detail = r.splits.map(s => `${s.name}: ${fmt(s.time)}`).join('<br>') + `<br><b>Total: ${fmt(r.total)}</b>`;
+        } else if (r.retention !== undefined) {
+            detail = `Retención: ${fmt(r.retention)}`;
+        } else if (r.time !== undefined) {
+            detail = `Tiempo: ${fmt(r.time)}`;
+        } else if (r.cycles !== undefined) {
+            detail = `Ciclos: ${r.cycles} · Duración: ${fmt(r.duration)}`;
+        } else if (r.duration !== undefined) {
+            detail = `Duración: ${fmt(r.duration)}`;
+        }
+        roundsHTML += `<div class="round-item"><div class="round-title">Ronda ${r.num || ''}</div>${detail}</div>`;
+    });
+    roundsHTML += '</div>';
+    $('r-rounds').innerHTML = roundsHTML;
+}
+
+function copyResults() {
+    const d = sessionData;
+    const dateStr = d.startTime.toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeStr = d.startTime.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
+    let text = `🫁 BREATHWORK · ${d.mode.toUpperCase()}\n`;
+    text += `📅 ${dateStr} · ${timeStr}\n`;
+    text += `━━━━━━━━━━━━━━━━━━━━━\n`;
+
+    d.rounds.forEach(r => {
+        if (r.splits) {
+            text += `\n▸ Ronda ${r.num}\n`;
+            r.splits.forEach(s => text += `  ${s.name}: ${fmt(s.time)}\n`);
+            text += `  Total: ${fmt(r.total)}\n`;
+        } else if (r.retention !== undefined) {
+            text += `\n▸ Ronda ${r.num} · Retención: ${fmt(r.retention)}\n`;
+        } else if (r.time !== undefined) {
+            text += `\n▸ Ronda ${r.num} · ${fmt(r.time)}\n`;
+        } else if (r.cycles !== undefined) {
+            text += `\n▸ ${r.cycles} ciclos · ${fmt(r.duration)}\n`;
+        } else if (r.duration !== undefined) {
+            text += `\n▸ Duración: ${fmt(r.duration)}\n`;
+        }
+    });
+
+    text += `\n━━━━━━━━━━━━━━━━━━━━━`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        $('r-copy').textContent = '✅ COPIADO';
+        $('r-copy').classList.add('copied');
+        setTimeout(() => {
+            $('r-copy').textContent = '📋 COPIAR RESULTADOS';
+            $('r-copy').classList.remove('copied');
+        }, 2000);
+    }).catch(() => {
+        // Fallback
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        $('r-copy').textContent = '✅ COPIADO';
+    });
+}
+</script>
+
+</body>
+</html>

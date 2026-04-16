@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cronómetro de Apnea · 3 Fases</title>
+    <style>
+        :root {
+            --bg: #0b0b0f;
+            --card: #15151d;
+            --card-2: #1c1c26;
+            --text: #f2f5f7;
+            --muted: #a8afba;
+            --green-neon: #00ff88;
+            --primary: #7c4dff;
+            --primary-press: #5c35cb;
+            --danger: #d66a7f;
+            --border: #2f3440;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            background: radial-gradient(circle at top, #12131b 0%, var(--bg) 60%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .app {
+            width: min(760px, 100%);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .phase-label {
+            text-align: center;
+            color: var(--muted);
+            font-size: clamp(1rem, 2.6vw, 1.4rem);
+            margin: 8px 0 6px;
+            letter-spacing: 0.03em;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: clamp(3rem, 14vw, 6rem);
+            line-height: 1;
+            font-weight: 900;
+            color: var(--green-neon);
+            margin: 8px 0 16px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3), 0 0 25px rgba(0, 255, 136, 0.25);
+            font-variant-numeric: tabular-nums;
+        }
+
+        #btn-main {
+            width: 100%;
+            min-height: 88px;
+            border: none;
+            border-radius: 14px;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            font-weight: 800;
+            color: #fff;
+            background: linear-gradient(180deg, var(--primary) 0%, #6236f8 100%);
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            touch-action: manipulation;
+            margin-bottom: 12px;
+        }
+
+        #btn-main:active {
+            background: var(--primary-press);
+            transform: scale(0.997);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        #btn-reset {
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #fff;
+            background: var(--danger);
+            padding: 10px 16px;
+            cursor: pointer;
+        }
+
+        .round-counter {
+            text-align: center;
+            color: var(--muted);
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .table-card,
+        .history-card {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-variant-numeric: tabular-nums;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--border);
+            padding: 10px 8px;
+            text-align: left;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        th {
+            color: var(--muted);
+            font-size: 0.9rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .history-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .history-list li {
+            padding: 6px 0;
+            color: #d7dbe0;
+            border-bottom: 1px solid var(--border);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .history-list li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="app">
+        <div id="phase-text" class="phase-label">Listo para empezar · Fase 1: Vacío</div>
+        <div id="display" class="timer">00:00.0</div>
+
+        <button id="btn-main" type="button" onclick="handleMainButton()">INICIAR VACÍO</button>
+
+        <div class="controls">
+            <button id="btn-reset" type="button" onclick="resetApp()">REINICIAR</button>
+        </div>
+
+        <div id="round-counter" class="round-counter">Rondas completadas: 0</div>
+
+        <section id="results-card" class="table-card hidden" aria-live="polite">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fase</th>
+                        <th>Tiempo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1. Vacío Total</td><td id="res-1">-</td></tr>
+                    <tr><td>2. Sorbito (20%)</td><td id="res-2">-</td></tr>
+                    <tr><td>3. Lleno Total (100%)</td><td id="res-3">-</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="history-card">
+            <h3>Progreso por rondas</h3>
+            <ol id="history-list" class="history-list">
+                <li id="history-empty">Todavía no hay rondas registradas.</li>
+            </ol>
+        </section>
+    </main>
+
+    <script>
+        let timerInterval = null;
+        let sessionStart = null;
+        let phase = 0; // 0 ready, 1 vacío, 2 sorbito, 3 lleno, 4 terminado
+        let phaseStartTimes = [0, 0, 0, 0];
+        let currentSplits = { 1: 0, 2: 0, 3: 0 };
+        let rounds = 0;
+
+        const phaseText = document.getElementById('phase-text');
+        const display = document.getElementById('display');
+        const btnMain = document.getElementById('btn-main');
+        const resultsCard = document.getElementById('results-card');
+        const roundCounter = document.getElementById('round-counter');
+        const historyList = document.getElementById('history-list');
+        const historyEmpty = document.getElementById('history-empty');
+
+        function beep(duration = 120, frequency = 880) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) {
+                return;
+            }
+
+            const ctx = new AudioContextClass();
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration / 1000);
+
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+
+            oscillator.start();
+            oscillator.stop(ctx.currentTime + duration / 1000 + 0.02);
+            oscillator.onended = () => ctx.close();
+        }
+
+        function doubleBeep() {
+            beep(120, 900);
+            setTimeout(() => beep(140, 1100), 170);
+        }
+
+        function handleMainButton() {
+            const now = Date.now();
+
+            if (phase === 0) {
+                phase = 1;
+                sessionStart = now;
+                phaseStartTimes[1] = now;
+                timerInterval = setInterval(updateMainDisplay, 100);
+                btnMain.textContent = 'PASAR A SORBITO';
+                phaseText.textContent = 'Fase 1 en curso · Vacío Total';
+                beep(120, 760);
+                return;
+            }
+
+            if (phase === 1) {
+                currentSplits[1] = now - phaseStartTimes[1];
+                setResultCell(1, currentSplits[1]);
+                phase = 2;
+                phaseStartTimes[2] = now;
+                btnMain.textContent = 'PASAR A LLENO';
+                phaseText.textContent = 'Fase 2 en curso · Sorbito';
+                beep(120, 920);
+                return;
+            }
+
+            if (phase === 2) {
+                currentSplits[2] = now - phaseStartTimes[2];
+                setResultCell(2, currentSplits[2]);
+                phase = 3;
+                phaseStartTimes[3] = now;
+                btnMain.textContent = 'FINALIZAR';
+                phaseText.textContent = 'Fase 3 en curso · Lleno Total';
+                beep(120, 1020);
+                return;
+            }
+
+            if (phase === 3) {
+                currentSplits[3] = now - phaseStartTimes[3];
+                setResultCell(3, currentSplits[3]);
+                clearInterval(timerInterval);
+                timerInterval = null;
+                phase = 4;
+                resultsCard.classList.remove('hidden');
+                phaseText.textContent = 'Sesión finalizada ✔';
+                btnMain.textContent = 'INICIAR NUEVA RONDA';
+                addRoundToHistory(currentSplits);
+                doubleBeep();
+                return;
+            }
+
+            if (phase === 4) {
+                prepareNextRound();
+            }
+        }
+
+        function updateMainDisplay() {
+            const elapsed = Date.now() - sessionStart;
+            display.textContent = formatTime(elapsed);
+        }
+
+        function setResultCell(phaseNumber, ms) {
+            document.getElementById(`res-${phaseNumber}`).textContent = formatTime(ms);
+        }
+
+        function addRoundToHistory(splits) {
+            rounds += 1;
+            roundCounter.textContent = `Rondas completadas: ${rounds}`;
+
+            if (historyEmpty) {
+                historyEmpty.remove();
+            }
+
+            const total = splits[1] + splits[2] + splits[3];
+            const item = document.createElement('li');
+            item.textContent = `Ronda ${rounds} · Vacío ${formatTime(splits[1])} · Sorbito ${formatTime(splits[2])} · Lleno ${formatTime(splits[3])} · Total ${formatTime(total)}`;
+            historyList.prepend(item);
+        }
+
+        function prepareNextRound() {
+            phase = 0;
+            sessionStart = null;
+            phaseStartTimes = [0, 0, 0, 0];
+            currentSplits = { 1: 0, 2: 0, 3: 0 };
+            display.textContent = '00:00.0';
+            phaseText.textContent = 'Listo para empezar · Fase 1: Vacío';
+            btnMain.textContent = 'INICIAR VACÍO';
+            setResultCell(1, 0);
+            setResultCell(2, 0);
+            setResultCell(3, 0);
+            resultsCard.classList.add('hidden');
+        }
+
+        function formatTime(ms) {
+            const totalSeconds = ms / 1000;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = (totalSeconds % 60).toFixed(1);
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(4, '0')}`;
+        }
+
+        function resetApp() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
