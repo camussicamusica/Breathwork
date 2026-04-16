@@ -1,3 +1,8 @@
+ESP/ENG
+### 🚀 Live Demo
+* [Main Breathwork Dashboard](https://camussicamusica.github.io/Breathwork/Breathwork.html)
+* [Static Apnea Trainer](https://camussicamusica.github.io/Breathwork/apnea.html)
+
 ApneApp: Proyecto de Breathwork y Apnea
 ¡Bienvenido/a al repositorio de ApneApp! Este espacio centraliza el desarrollo de dos versiones distintas de una misma aplicación web diseñada para explorar y entrenar las técnicas de respiración (Breathwork) y apnea (retención de la respiración).
 
@@ -79,3 +84,6 @@ How to Access the Apps
 Both versions are available to use live via GitHub Pages. Explore them and find the one that best fits your training goals!
 
 👉 View ApneApp Live
+### 🚀 Live Demo
+* [Main Breathwork Dashboard](https://camussicamusica.github.io/Breathwork/Breathwork.html)
+* [Static Apnea Trainer](https://camussicamusica.github.io/Breathwork/apnea.html)
